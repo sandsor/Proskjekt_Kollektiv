@@ -1,0 +1,3 @@
+k Leksehuset
+k Kosehuset
+p 100

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Prosjekt_KollektivGameModeBase.generated.h"
+#include "KollektivManagerGameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROSJEKT_KOLLEKTIV_API AProsjekt_KollektivGameModeBase : public AGameModeBase
+class KOLLEKTIVMANAGER_API AKollektivManagerGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	

@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class Prosjekt_Kollektiv : ModuleRules
+public class KollektivManager : ModuleRules
 {
-	public Prosjekt_Kollektiv(ReadOnlyTargetRules Target) : base(Target)
+	public KollektivManager(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
