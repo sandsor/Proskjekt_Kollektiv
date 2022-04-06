@@ -72,9 +72,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kollektiv")
 	TArray<FString> mMembers;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kollektiv")
-		TArray<FString> mRooms;
+		TArray<FRoom> mRooms;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kollektiv")
-		TArray<FString> mTasks;
+		TArray<FTask> mTasks;
 	FKollektiv() {
 		mName = "";
 
@@ -111,12 +111,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
 	FMember signedInMember;
 	UFUNCTION(BlueprintCallable)
-		FMember GetMember(FString name);
+	FMember GetMember(FString name);
 //Kollektiver
 	UFUNCTION(BlueprintCallable)
 		FKollektiv GetKollektiv(FString name);
 	UFUNCTION(BlueprintCallable)
-		FKollektiv NewKollektiv(FString name, TArray<FString> members);
+		FKollektiv NewKollektiv(FString name, TArray<FString> members, TArray<FString> rooms);
 	UFUNCTION(BlueprintCallable)
 		bool SignIn(FString memberName);
 

@@ -189,30 +189,50 @@ FKollektiv AMyActor::GetKollektiv(FString name) {
 		if (oneWord == "r") {
 			//Store the room name
 			sstream >> tmp;
-			kollektiv.mRooms.Add(tmp.c_str());
-			UE_LOG(LogTemp, Warning, TEXT("Found room: %s"), *tmp.c_str());
+			FRoom r;
+			r.mRoomName = tmp.c_str();
+			
+			kollektiv.mRooms.Add(r);
+			//UE_LOG(LogTemp, Warning, TEXT("Found room: %s"), *tmp.c_str());
 			continue;
 		}
 
 		if (oneWord == "t") {
 			sstream >> tmp;
+			FTask t;
+			t.mTaskName = tmp.c_str();
+			kollektiv.mTasks.Add(t);
 
+			continue;
 		}
 	}
 	
 	//Load all the rooms found in this kollektiv, load all the tasks found in this room
 
 	kollektiv.mName = name;
+
+	for (int i = 0; i < kollektiv.mTasks.Num(); i++) {
+
+	}
+	for (int i = 0; i < kollektiv.mRooms.Num(); i++) {
+		kollektiv.mRooms[i].mKollektiv = kollektiv.mName;
+	}
 	//This kollektiv has been loaded, add to all kollektiver
 	allKollektiver.Add(kollektiv);
 	return kollektiv;
 }
 
-FKollektiv AMyActor::NewKollektiv(FString name, TArray<FString> members)
+FKollektiv AMyActor::NewKollektiv(FString name, TArray<FString> members, TArray<FString> rooms)
 {
 	FKollektiv k;
 	k.mName = name;
 	k.mMembers = members;
+	
+	for (int i = 0; i < rooms.Num(); i++) {
+		FRoom r;
+		r.mRoomName = rooms[i];
+		k.mRooms.Add(r);
+	}
 	for (int i = 0; i < members.Num(); i++) {
 		//Re sign in
 		FMember m = GetMember(members[i]);
@@ -236,7 +256,9 @@ void AMyActor::SaveKollektiv(FKollektiv k)
 		for (int i = 0; i < k.mMembers.Num(); i++) {
 			file << "m " << TCHAR_TO_UTF8(*k.mMembers[i]) << "\n";
 		}
-
+		for (int i = 0; i < k.mRooms.Num(); i++) {
+			file << "r " << TCHAR_TO_UTF8(*k.mRooms[i].mRoomName) << "\n";
+		}
 		//Write rooms r Kjøkken, t Tømmesøppel
 	}
 
