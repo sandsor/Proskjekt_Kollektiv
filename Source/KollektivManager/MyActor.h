@@ -23,6 +23,47 @@ public:
 };
 
 USTRUCT(BlueprintType)
+struct FRoom {
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mRoomName = "Task";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mRoomDesc = "Description";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mKollektiv = "";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		TArray<FString> mTasks;
+	FRoom() {
+
+	}
+
+};
+
+USTRUCT(BlueprintType)
+struct FTask {
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mTaskName = "Task";							  
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mTaskDesc = "Description";					  
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mKollektiv = "";				   
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mMemberAssigned = "Adam";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		bool mIsFinished = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mRoom = "";
+	FTask() {
+
+	}
+
+};
+
+
+USTRUCT(BlueprintType)
 struct FKollektiv {
 	GENERATED_BODY()
 public:
@@ -30,13 +71,18 @@ public:
 	FString mName = "Kollektiv";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kollektiv")
 	TArray<FString> mMembers;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kollektiv")
+		TArray<FString> mRooms;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kollektiv")
+		TArray<FString> mTasks;
 	FKollektiv() {
 		mName = "";
 
 	}
 
 };
+
+
 
 UCLASS()
 class KOLLEKTIVMANAGER_API AMyActor : public AActor
@@ -57,6 +103,9 @@ public:
 
 	TArray<FMember> allMembers;
 	TArray<FKollektiv> allKollektiver;
+	TArray<FMember> allRooms;
+	TArray<FKollektiv> allTasks;
+
 
 	//Signing into an member account
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
@@ -66,7 +115,8 @@ public:
 //Kollektiver
 	UFUNCTION(BlueprintCallable)
 		FKollektiv GetKollektiv(FString name);
-
+	UFUNCTION(BlueprintCallable)
+		FKollektiv NewKollektiv(FString name, TArray<FString> members);
 	UFUNCTION(BlueprintCallable)
 		bool SignIn(FString memberName);
 
@@ -75,6 +125,7 @@ public:
 	void SaveMember(FMember m);
 
 	void AddMember(FMember m);
+
 	void AddKollektiv(FKollektiv k);
 	
 	UFUNCTION(BlueprintCallable)
