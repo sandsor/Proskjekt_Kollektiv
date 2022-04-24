@@ -1,2 +1,4 @@
-k Leksehuset
-p 100
+n Adam
+p 455
+t Gang
+t Promp

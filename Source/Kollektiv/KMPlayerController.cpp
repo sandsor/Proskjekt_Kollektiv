@@ -8,7 +8,7 @@ void AKMPlayerController::BeginPlay() {
 	Super::BeginPlay();
 	//
 	
-	LoadAllPieces();
+	//LoadAllPieces();
 }
 
 void AKMPlayerController::LoadAllPieces() {
@@ -44,7 +44,7 @@ bool AKMPlayerController::SignIn(FString memberName, FString kollektivName)
 
 void AKMPlayerController::SignOut()
 {
-	
+	SaveMember(mSignedInMember);
 	OpenSignInScreen();
 }
 
@@ -92,6 +92,7 @@ FMember AKMPlayerController::GetMember(FString name) {
 	std::string tmp;
 
 	FMember m;
+	FAvatar avatar;
 	m.mName = memberName;
 	while (std::getline(file, oneLine, '\n')) {
 		//To store one word
@@ -122,16 +123,41 @@ FMember AKMPlayerController::GetMember(FString name) {
 			m.mUnlockedAvatarPieces.Add(tmp.c_str());
 		}
 	}
-
-
+	m.mAvatar = avatar;
 	return m;
 }
 
+
+void AKMPlayerController::SaveMember(FMember m)
+{
+	//Add content directory to the member name
+	FString fileLoc = FPaths::ProjectContentDir();
+	//Add the specific file ending
+	fileLoc.Append(m.mName + ".txt");
+	std::ofstream file(TCHAR_TO_UTF8(*fileLoc), std::ios_base::out);
+	if (file.is_open()) {
+		//Save the name
+		file << "n " << TCHAR_TO_UTF8(*m.mName) << '\n';
+		//Save the equipped
+
+		//Save avatar unlockables
+		for (int i = 0; i < m.mUnlockedAvatarPieces.Num(); i++) {
+			file << "a " << TCHAR_TO_UTF8(*m.mUnlockedAvatarPieces[i]) << '\n';
+		}
+		file << "p " << std::to_string(m.mPoints) << '\n';
+	}
+
+	file.close();
+}
 
 FKollektiv AKMPlayerController::GetKollektiv(FString name) {
 
 
 	return FKollektiv{};
+}
+
+void AKMPlayerController::SaveKollektiv(FKollektiv k)
+{
 }
 
 bool AKMPlayerController::AddMemberToKollektiv(FMember m) {
@@ -191,7 +217,7 @@ TArray<FAvatarPiece> AKMPlayerController::GetSignedInMembersUnlockedPieces() {
 	//Refresh the owned
 	TArray<FAvatarPiece> t;
 	for (int i = 0; i < mSignedInMember.mUnlockedAvatarPieces.Num(); i++) {
-		for (int j = 0; j < mAllAvatarUnlockables.Num(); i++) {
+		for (int j = 0; j < mAllAvatarUnlockables.Num(); j++) {
 			if (mSignedInMember.mUnlockedAvatarPieces[i] == mAllAvatarUnlockables[j].mName) {
 				t.Add(mAllAvatarUnlockables[j]);
 			}
@@ -203,31 +229,46 @@ TArray<FAvatarPiece> AKMPlayerController::GetSignedInMembersUnlockedPieces() {
 
 bool AKMPlayerController::EquipAvatarPiece(FAvatarPiece p) {
 	switch (p.mType) {
-	case AvatarPieceType::BODY:
-		mSignedInMember.mAvatar.mBodyTexture = p.mTexture;
-		break;
 	case AvatarPieceType::HEAD:
 		mSignedInMember.mAvatar.mHeadTexture = p.mTexture;
-		break;
-	case AvatarPieceType::HAT:
-		mSignedInMember.mAvatar.mHatTexture = p.mTexture;
+		mSignedInMember.mHead = p.mName;
+		OnUpdateWardrobe.Broadcast();
 		break;
 	case AvatarPieceType::FEET:
 		mSignedInMember.mAvatar.mFeetTexture = p.mTexture;
+		mSignedInMember.mFeet = p.mName;
+		OnUpdateWardrobe.Broadcast();
 		break;
 	case AvatarPieceType::GLASSES:
 		mSignedInMember.mAvatar.mGlassesTexture = p.mTexture;
+		mSignedInMember.mGlasses = p.mName;
+		OnUpdateWardrobe.Broadcast();
+		break;
+	case AvatarPieceType::BACK:
+		mSignedInMember.mAvatar.mBackTexture = p.mTexture;
+		mSignedInMember.mBack = p.mName;
+		OnUpdateWardrobe.Broadcast();
 		break;
 	}
 
+	OnUpdateWardrobe.Broadcast();
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, TEXT("Should fire OnUpdateWardrobe"));
 	return true;
 }
 
 bool AKMPlayerController::BuyAvatarPiece(FAvatarPiece p) {
-
-	if (mSignedInMember.mPoints > p.mCost) {
-
+	//Check if the player already has the piece
+	TArray<FAvatarPiece> t = GetSignedInMembersUnlockedPieces();
+	for (auto it : t) {
+		if (it.mName == p.mName) {
+			return false;
+		}
+	}
+	//Check for enough points
+	if (mSignedInMember.mPoints >= p.mCost) {
+		mSignedInMember.mPoints -= p.mCost;
 		mSignedInMember.mUnlockedAvatarPieces.Add(p.mName);
+		OnUpdateGold.Broadcast();
 		return true;
 	}
 	else {

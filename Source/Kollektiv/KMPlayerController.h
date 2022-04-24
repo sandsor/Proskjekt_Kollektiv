@@ -9,10 +9,13 @@
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FChangedWardrobe);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSpentGold);
+
 
 UENUM(BlueprintType)
 enum AvatarPieceType {
-	HEAD, GLASSES, BODY, FEET, HAT
+	HEAD, GLASSES, BODY, FEET, BACK
 };
 USTRUCT(BlueprintType)
 struct FAvatar {
@@ -21,18 +24,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
 	UTexture2D* mBaseTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
-	UTexture2D* mHatTexture;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
-	UTexture2D* mBodyTexture;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
 	UTexture2D* mGlassesTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
 		UTexture2D* mFeetTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
 		UTexture2D* mHeadTexture;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		UTexture2D* mBackTexture;
+	FAvatar() {
+		mBaseTexture	= nullptr;
+		mBackTexture	= nullptr;
+		mGlassesTexture	= nullptr;
+		mFeetTexture	= nullptr;
+		mHeadTexture	= nullptr;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -63,6 +68,11 @@ public:
 		FAvatar mAvatar; //The avatar refrence
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
 		TArray<FString> mUnlockedAvatarPieces; //Names of the pieces that is unlocked for the member
+
+	FString mHead;
+	FString mBack;
+	FString mFeet;
+	FString mGlasses;
 
 	FMember() {
 		mName = "";
@@ -131,8 +141,11 @@ public:
 	void DivideOutTasks();
 
 	FMember GetMember(FString name);
+	UFUNCTION(BlueprintCallable)
+		void SaveMember(FMember m);
 	FKollektiv GetKollektiv(FString name);
-
+	UFUNCTION(BlueprintCallable)
+		void SaveKollektiv(FKollektiv k);
 	UFUNCTION(BlueprintCallable)
 	bool AddTaskToKollektiv(FTask t);
 	UFUNCTION(BlueprintCallable)
@@ -153,15 +166,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 		TArray<FTask> GetSignedInMembersTasks();
 	UFUNCTION(BlueprintCallable)
+		void CompleteTask(FTask t);
+
+	UFUNCTION(BlueprintCallable)
 	bool CanLogIn(FString name);
 	UFUNCTION(BlueprintCallable)
 	bool SignIn(FString memberName, FString kollektivName);
 	UFUNCTION(BlueprintImplementableEvent)
-	void SingedIn();
+		void SingedIn();
 	UFUNCTION(BlueprintImplementableEvent)
 		void OpenSignInScreen();
 	UFUNCTION(BlueprintCallable)
 	void SignOut();
 	UFUNCTION(BlueprintCallable)
 		FMember GetSignedInMember() { return mSignedInMember; };
+
+
+	UPROPERTY(BlueprintAssignable, meta = (DisplayName = "UpdatedWardrobe"))
+		FChangedWardrobe OnUpdateWardrobe;
+	UPROPERTY(BlueprintAssignable, meta = (DisplayName = "UpdateGold"))
+		FSpentGold OnUpdateGold;
 };
