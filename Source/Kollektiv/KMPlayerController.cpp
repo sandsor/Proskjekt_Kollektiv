@@ -48,6 +48,14 @@ void AKMPlayerController::SignOut()
 	OpenSignInScreen();
 }
 
+int AKMPlayerController::DaysInMonth()
+{
+	FDateTime t = GetDateTime();
+
+	int days = FDateTime::DaysInMonth(t.GetYear(), t.GetMonth());
+	return days;
+}
+
 void AKMPlayerController::DivideOutTasks() {
 
 	for (int i = 0; i < mActiveKollektiv.mTasks.Num(); i++) {
@@ -102,7 +110,6 @@ FMember AKMPlayerController::GetMember(FString name) {
 		oneWord = "";
 		//Put it into oneWord
 		sstream >> oneWord;
-
 		//check for member to load
 		if (oneWord == "k") {
 			//Store member name
@@ -158,6 +165,27 @@ FKollektiv AKMPlayerController::GetKollektiv(FString name) {
 
 void AKMPlayerController::SaveKollektiv(FKollektiv k)
 {
+	//Add content directory to the member name
+	FString fileLoc = FPaths::ProjectContentDir();
+	//Add the specific file ending
+	fileLoc.Append(k.mKollektivName + ".txt");
+	std::ofstream file(TCHAR_TO_UTF8(*fileLoc), std::ios_base::out);
+	if (file.is_open()) {
+		//Save the name
+		file << "n " << TCHAR_TO_UTF8(*k.mKollektivName) << '\n';
+		//Save the equipped
+
+		//Save tasks
+		for (int i = 0; i < k.mTasks.Num(); i++) {
+			file << "t " << TCHAR_TO_UTF8(*k.mTasks[i].mTaskName) << '\n';
+		}
+		//Save avatar unlockables
+		for (int i = 0; i < k.mMembers.Num(); i++) {
+			file << "m " << TCHAR_TO_UTF8(*k.mMembers[i].mName) << '\n';
+		}
+	}
+
+	file.close();
 }
 
 bool AKMPlayerController::AddMemberToKollektiv(FMember m) {
@@ -206,6 +234,13 @@ TArray<FTask> AKMPlayerController::GetSignedInMembersTasks() {
 	}
 
 	return t;
+}
+
+void AKMPlayerController::CompleteTask(FTask t)
+{
+	t.TimeCompleted = GetDateTime();
+	t.bIsCompleted = true;
+
 }
 
 TArray<FAvatarPiece> AKMPlayerController::GetAllAvatarUnlockables()

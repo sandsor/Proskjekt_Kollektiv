@@ -31,6 +31,7 @@ public:
 		UTexture2D* mHeadTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
 		UTexture2D* mBackTexture;
+	
 	FAvatar() {
 		mBaseTexture	= nullptr;
 		mBackTexture	= nullptr;
@@ -94,14 +95,20 @@ USTRUCT(BlueprintType)
 struct FTask {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
-		FString mTaskName = "kasse";
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
-		FString mTaskDesc = "Vask ting";
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
-		FMember mMember;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
-		int mDateDeadline = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mTaskName = "kasse";					   
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FString mTaskDesc = "Vask ting";				  
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FMember mMember;								  
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		int mRemainingDays = 0;						
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FDateTime TimeCreated{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		FDateTime TimeCompleted{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+		bool bIsCompleted = false;
 	FTask() {
 		
 	}
@@ -186,4 +193,8 @@ public:
 		FChangedWardrobe OnUpdateWardrobe;
 	UPROPERTY(BlueprintAssignable, meta = (DisplayName = "UpdateGold"))
 		FSpentGold OnUpdateGold;
+	UFUNCTION(BlueprintCallable)
+	FDateTime GetDateTime() { return FDateTime::Now(); };
+	UFUNCTION(BlueprintCallable)
+	int DaysInMonth();
 };
