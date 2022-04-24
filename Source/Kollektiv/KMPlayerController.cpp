@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+																							// Fill out your copyright notice in the Description page of Project Settings.
 #include "KMPlayerController.h"
 #include <iostream>
 #include <fstream>
@@ -6,7 +6,21 @@
 
 void AKMPlayerController::BeginPlay() {
 	Super::BeginPlay();
+	//
+	
+	LoadAllPieces();
+}
 
+void AKMPlayerController::LoadAllPieces() {
+	//Load all avatar pieces
+	UTexture2D* tmp;
+	FString path;
+
+	if (path.IsEmpty()) {
+		return;
+	}
+
+	tmp = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *path));
 
 }
 
@@ -19,7 +33,11 @@ bool AKMPlayerController::SignIn(FString memberName, FString kollektivName)
 {
 	mSignedInMember = GetMember(memberName);
 	mActiveKollektiv = GetKollektiv(kollektivName);
-
+	//Set the base bodt texture for the avatar
+	/*UTexture2D* tmp;
+	FString path = "../Content/AvatarClothing/BASEBODY.png";
+	tmp = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *path));
+	mSignedInMember.mAvatar.mBaseTexture = tmp;*/
 	SingedIn();
 	return false;
 }
@@ -93,12 +111,18 @@ FMember AKMPlayerController::GetMember(FString name) {
 			UE_LOG(LogTemp, Warning, TEXT("Found kollektiv %s"), *k.mKollektivName);
 			continue;
 		}
-
+		//Points
 		if (oneWord == "p") {
 			sstream >> tmp;
 			m.mPoints = std::stoi(tmp);
 		}
+		//Avatar pieces name
+		if (oneWord == "a") {
+			sstream >> tmp;
+			m.mUnlockedAvatarPieces.Add(tmp.c_str());
+		}
 	}
+
 
 	return m;
 }
@@ -156,4 +180,59 @@ TArray<FTask> AKMPlayerController::GetSignedInMembersTasks() {
 	}
 
 	return t;
+}
+
+TArray<FAvatarPiece> AKMPlayerController::GetAllAvatarUnlockables()
+{
+	return mAllAvatarUnlockables;
+}
+
+TArray<FAvatarPiece> AKMPlayerController::GetSignedInMembersUnlockedPieces() {
+	//Refresh the owned
+	TArray<FAvatarPiece> t;
+	for (int i = 0; i < mSignedInMember.mUnlockedAvatarPieces.Num(); i++) {
+		for (int j = 0; j < mAllAvatarUnlockables.Num(); i++) {
+			if (mSignedInMember.mUnlockedAvatarPieces[i] == mAllAvatarUnlockables[j].mName) {
+				t.Add(mAllAvatarUnlockables[j]);
+			}
+		}
+	}
+
+	return t;
+}
+
+bool AKMPlayerController::EquipAvatarPiece(FAvatarPiece p) {
+	switch (p.mType) {
+	case AvatarPieceType::BODY:
+		mSignedInMember.mAvatar.mBodyTexture = p.mTexture;
+		break;
+	case AvatarPieceType::HEAD:
+		mSignedInMember.mAvatar.mHeadTexture = p.mTexture;
+		break;
+	case AvatarPieceType::HAT:
+		mSignedInMember.mAvatar.mHatTexture = p.mTexture;
+		break;
+	case AvatarPieceType::FEET:
+		mSignedInMember.mAvatar.mFeetTexture = p.mTexture;
+		break;
+	case AvatarPieceType::GLASSES:
+		mSignedInMember.mAvatar.mGlassesTexture = p.mTexture;
+		break;
+	}
+
+	return true;
+}
+
+bool AKMPlayerController::BuyAvatarPiece(FAvatarPiece p) {
+
+	if (mSignedInMember.mPoints > p.mCost) {
+
+		mSignedInMember.mUnlockedAvatarPieces.Add(p.mName);
+		return true;
+	}
+	else {
+		return false;
+	}
+
+	return true;
 }

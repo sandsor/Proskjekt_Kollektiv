@@ -10,6 +10,10 @@
  * 
  */
 
+UENUM(BlueprintType)
+enum AvatarPieceType {
+	HEAD, GLASSES, BODY, FEET, HAT
+};
 USTRUCT(BlueprintType)
 struct FAvatar {
 	GENERATED_BODY()
@@ -24,13 +28,26 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
 	UTexture2D* mGlassesTexture;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		UTexture2D* mFeetTexture;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		UTexture2D* mHeadTexture;
+
 };
 
 USTRUCT(BlueprintType)
 struct FAvatarPiece {
 	GENERATED_BODY()
 public:
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		FString mName = "Piece";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		UTexture2D* mTexture;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		TEnumAsByte<AvatarPieceType> mType = AvatarPieceType::HEAD;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Avatar")
+		int mCost = 5;
+	bool bIsOwnedBySignedInPlayer = false;
 };
 
 USTRUCT(BlueprintType)
@@ -41,6 +58,11 @@ public:
 		FString mName = "Adam";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
 		int mPoints = 0;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
+		FAvatar mAvatar; //The avatar refrence
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Member")
+		TArray<FString> mUnlockedAvatarPieces; //Names of the pieces that is unlocked for the member
 
 	FMember() {
 		mName = "";
@@ -97,7 +119,12 @@ class KOLLEKTIV_API AKMPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	virtual void BeginPlay() override;
+	void LoadAllPieces();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar")
+	TArray<FAvatarPiece> mAllAvatarUnlockables;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Avatar")
+		int number;
 	FMember mSignedInMember;
 	FKollektiv mActiveKollektiv;
 
@@ -111,6 +138,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddMemberToKollektiv(FMember m);
 
+	//Avatar
+	UFUNCTION(BlueprintCallable)
+	TArray<FAvatarPiece> GetAllAvatarUnlockables(); //All possible unlockable items for the avatar
+	UFUNCTION(BlueprintCallable)
+		TArray<FAvatarPiece> GetSignedInMembersUnlockedPieces(); //The pieces that the player has unlocked
+	UFUNCTION(BlueprintCallable)
+		bool EquipAvatarPiece(FAvatarPiece p);
+	UFUNCTION(BlueprintCallable)
+		bool BuyAvatarPiece(FAvatarPiece p);
 
 	UFUNCTION(BlueprintCallable)
 		TArray<FTask> GetAllTasks();
@@ -126,4 +162,6 @@ public:
 		void OpenSignInScreen();
 	UFUNCTION(BlueprintCallable)
 	void SignOut();
+	UFUNCTION(BlueprintCallable)
+		FMember GetSignedInMember() { return mSignedInMember; };
 };
